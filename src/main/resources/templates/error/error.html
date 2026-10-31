@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${statusCode} + ' Error - InvenTrack'">Error - InvenTrack</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: sidebar('')}"></div>
+  <div class="main-content">
+    <main class="content-area">
+      <div class="empty-state" style="padding:100px 20px">
+        <div class="empty-icon" th:text="${statusCode ?: '500'}"></div>
+        <h4 th:text="${errorTitle ?: 'Something went wrong'}">Error</h4>
+        <p th:text="${errorMessage ?: 'An unexpected error occurred.'}"></p>
+        <a th:href="@{/}" class="btn btn-primary" style="margin-top:16px">&#8592; Back to Dashboard</a>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

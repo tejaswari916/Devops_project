@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock Movement - InvenTrack</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: sidebar('stock')}"></div>
+  <div class="main-content">
+    <header class="top-header">
+      <div>
+        <div class="page-title">Stock Movement</div>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item active">Record Stock In / Out</li></ol></nav>
+      </div>
+      <a th:href="@{/stock/history}" class="btn btn-secondary btn-sm">&#128203; Transaction History</a>
+    </header>
+    <main class="content-area">
+      <!-- Flash Messages -->
+      <div th:if="${successMessage}" class="alert alert-success" data-auto-dismiss="true">
+        <span>&#10003;</span><span th:text="${successMessage}"></span>
+      </div>
+      <div th:if="${errorMessage}" class="alert alert-danger" data-auto-dismiss="true">
+        <span>&#9888;</span><span th:text="${errorMessage}"></span>
+      </div>
+
+      <div class="row g-3">
+        <!-- Stock In -->
+        <div class="col-12 col-md-6">
+          <div class="content-card">
+            <div class="card-header">
+              <h6 style="color:#276749">&#43; Stock In (Receive Inventory)</h6>
+            </div>
+            <div class="card-body">
+              <form th:action="@{/stock/in}" th:object="${txDTO}" method="post" novalidate>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="mb-3">
+                  <label class="form-label" for="productId">Product <span style="color:red">*</span></label>
+                  <select id="productId" name="productId" class="form-select" required>
+                    <option value="">-- Select a Product --</option>
+                    <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name + ' (' + p.sku + ')'}" th:attr="data-qty=${p.quantity},data-threshold=${p.minStockThreshold}"></option>
+                  </select>
+                </div>
+                <div class="mb-2" id="currentStockDisplay" style="font-size:13px;color:#718096;min-height:20px"></div>
+                <input type="hidden" id="maxAvailableQty" value="999999"/>
+                <div class="mb-3">
+                  <label class="form-label" for="quantity">Quantity to Receive <span style="color:red">*</span></label>
+                  <input type="number" id="quantity" th:field="*{quantity}" class="form-control"
+                         th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'"
+                         min="1" placeholder="Enter quantity" required/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
+                  <span id="qtyFeedback" class="text-danger fs-12"></span>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="remarks">Remarks</label>
+                  <input type="text" th:field="*{remarks}" class="form-control"
+                         placeholder="e.g. Purchase Order #123, Supplier delivery"/>
+                </div>
+                <button type="submit" class="btn btn-success" style="width:100%;justify-content:center">
+                  &#43; Receive Stock
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock Out -->
+        <div class="col-12 col-md-6">
+          <div class="content-card">
+            <div class="card-header">
+              <h6 style="color:#742a2a">&#8722; Stock Out (Issue / Sell)</h6>
+            </div>
+            <div class="card-body">
+              <form th:action="@{/stock/out}" th:object="${txDTO}" method="post" novalidate>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="mb-3">
+                  <label class="form-label">Product <span style="color:red">*</span></label>
+                  <select name="productId" class="form-select" required>
+                    <option value="">-- Select a Product --</option>
+                    <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name + ' [' + p.quantity + ' available]'}" th:disabled="${p.quantity == 0}"></option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Quantity to Issue <span style="color:red">*</span></label>
+                  <input type="number" name="quantity" class="form-control" min="1" placeholder="Enter quantity" required/>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Remarks</label>
+                  <input type="text" name="remarks" class="form-control"
+                         placeholder="e.g. Sales Order #456, Department request"/>
+                </div>
+                <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center">
+                  &#8722; Issue Stock
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

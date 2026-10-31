@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="sidebar(activePage)" class="sidebar">
+  <a href="/" class="sidebar-brand">
+    <div class="brand-icon">&#128218;</div>
+    <div class="brand-text">
+      InvenTrack
+      <small>Inventory Management</small>
+    </div>
+  </a>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+
+    <a th:href="@{/}" class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+      <span class="nav-icon">&#9783;</span>
+      Dashboard
+    </a>
+
+    <a th:href="@{/products}" class="nav-link" th:classappend="${activePage == 'products'} ? 'active' : ''">
+      <span class="nav-icon">&#128230;</span>
+      Products
+    </a>
+
+    <div class="nav-section-label">Operations</div>
+
+    <a th:href="@{/stock}" class="nav-link" th:classappend="${activePage == 'stock'} ? 'active' : ''">
+      <span class="nav-icon">&#128260;</span>
+      Stock Movement
+    </a>
+
+    <a th:href="@{/stock/history}" class="nav-link" th:classappend="${activePage == 'history'} ? 'active' : ''">
+      <span class="nav-icon">&#128203;</span>
+      Transaction History
+    </a>
+
+    <div class="nav-section-label">System</div>
+
+    <a th:href="@{/actuator/health}" target="_blank" class="nav-link">
+      <span class="nav-icon">&#10084;</span>
+      Health Check
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" sec:authentication="name" th:text="${#strings.substring(#authentication.name,0,1).toUpperCase()}">A</div>
+      <div>
+        <div class="user-name" sec:authentication="name" th:text="${#authentication.name}">admin</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin:0">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <button type="submit" class="btn btn-secondary" style="width:100%;font-size:12px;padding:7px">
+        &#x2B06; Sign Out
+      </button>
+    </form>
+  </div>
+</nav>
+</body>
+</html>

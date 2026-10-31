@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-config
+  namespace: inventory-system
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  DB_HOST: "inventory-mysql"
+  DB_PORT: "3306"
+  DB_NAME: "inventorydb"

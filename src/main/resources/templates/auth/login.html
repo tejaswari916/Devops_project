@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - InvenTrack</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="login-page">
+<div class="login-card">
+  <div class="login-logo">&#128218;</div>
+  <h4 class="text-center fw-600 mb-1">InvenTrack</h4>
+  <p class="text-center text-muted fs-13 mb-4">Inventory Management System</p>
+
+  <div th:if="${param.error}" class="alert alert-danger" role="alert" data-auto-dismiss="true">
+    <span>&#9888;</span>
+    <span>Invalid username or password. Please try again.</span>
+  </div>
+
+  <div th:if="${param.logout}" class="alert alert-success" role="alert" data-auto-dismiss="true">
+    <span>&#10003;</span>
+    <span>You have been signed out successfully.</span>
+  </div>
+
+  <form th:action="@{/login}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input type="text" id="username" name="username"
+             class="form-control" placeholder="Enter username"
+             autocomplete="username" required autofocus/>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label" for="password">Password</label>
+      <input type="password" id="password" name="password"
+             class="form-control" placeholder="Enter password"
+             autocomplete="current-password" required/>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px">
+      &#128274; Sign In
+    </button>
+  </form>
+
+  <p class="text-center text-muted fs-12 mt-4 mb-0">
+    Default: <strong>admin</strong> / <strong>admin123</strong>
+  </p>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

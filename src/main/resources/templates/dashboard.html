@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - InvenTrack</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="app-layout">
+
+  <div th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></div>
+
+  <div class="main-content">
+    <header class="top-header">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item active">Overview</li></ol></nav>
+      </div>
+      <button id="sidebar-toggle" class="btn btn-secondary btn-sm" style="display:none" aria-label="Toggle sidebar">
+        &#9776;
+      </button>
+    </header>
+
+    <main class="content-area">
+      <!-- Flash Messages -->
+      <div th:if="${successMessage}" class="alert alert-success" data-auto-dismiss="true">
+        <span>&#10003;</span><span th:text="${successMessage}"></span>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card primary">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value" th:text="${stats.totalProducts}">0</div>
+            <div class="stat-icon">&#128230;</div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card success">
+            <div class="stat-label">Total Stock Units</div>
+            <div class="stat-value" th:text="${stats.totalStockUnits}">0</div>
+            <div class="stat-icon">&#128200;</div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card warning">
+            <div class="stat-label">Low Stock</div>
+            <div class="stat-value" th:text="${stats.lowStockCount}">0</div>
+            <div class="stat-icon">&#9888;</div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card danger">
+            <div class="stat-label">Out of Stock</div>
+            <div class="stat-value" th:text="${stats.outOfStockCount}">0</div>
+            <div class="stat-icon">&#128683;</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Recent Products -->
+        <div class="col-12 col-lg-7">
+          <div class="content-card">
+            <div class="card-header">
+              <h6>Recently Added Products</h6>
+              <a th:href="@{/products}" class="btn btn-outline-primary btn-sm">View All</a>
+            </div>
+            <div th:if="${stats.recentProducts.isEmpty()}" class="empty-state" style="padding:40px">
+              <div class="empty-icon">&#128230;</div>
+              <h5>No products yet</h5>
+              <p><a th:href="@{/products/new}">Add your first product</a></p>
+            </div>
+            <table th:unless="${stats.recentProducts.isEmpty()}" class="data-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="p : ${stats.recentProducts}"
+                    th:data-href="@{/products/{id}(id=${p.id})}"
+                    th:classappend="${p.outOfStock} ? 'out-of-stock-row' : (${p.lowStock} ? 'low-stock-row' : '')">
+                  <td>
+                    <div class="fw-600 fs-13" th:text="${p.name}"></div>
+                    <div class="text-muted fs-12" th:text="${p.category}"></div>
+                  </td>
+                  <td><code th:text="${p.sku}"></code></td>
+                  <td class="fw-600" th:text="${p.quantity}"></td>
+                  <td>
+                    <span class="stock-badge"
+                          th:classappend="${p.outOfStock} ? 'badge-out-of-stock' : (${p.lowStock} ? 'badge-low-stock' : 'badge-in-stock')"
+                          th:text="${p.stockStatus.replace('_',' ')}"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="col-12 col-lg-5">
+          <div class="content-card">
+            <div class="card-header">
+              <h6>&#9888; Low Stock Alerts</h6>
+              <span class="stock-badge badge-low-stock" th:text="${stats.lowStockProducts.size()} + ' items'"></span>
+            </div>
+            <div th:if="${stats.lowStockProducts.isEmpty()}" class="empty-state" style="padding:40px">
+              <div class="empty-icon">&#10003;</div>
+              <h5>All stock levels OK</h5>
+              <p>No products are running low.</p>
+            </div>
+            <table th:unless="${stats.lowStockProducts.isEmpty()}" class="data-table">
+              <thead>
+                <tr><th>Product</th><th>Qty</th><th>Min</th></tr>
+              </thead>
+              <tbody>
+                <tr th:each="p : ${stats.lowStockProducts}">
+                  <td>
+                    <a th:href="@{/products/{id}(id=${p.id})}" th:text="${p.name}" style="color:inherit;text-decoration:none"></a>
+                  </td>
+                  <td>
+                    <span class="fw-600" th:classappend="${p.outOfStock} ? 'text-danger' : 'text-warning'" th:text="${p.quantity}"></span>
+                  </td>
+                  <td class="text-muted" th:text="${p.minStockThreshold}"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="content-card mt-3">
+            <div class="card-header"><h6>Quick Actions</h6></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+              <a th:href="@{/products/new}" class="btn btn-primary">&#43; Add New Product</a>
+              <a th:href="@{/stock}" class="btn btn-success">&#128260; Record Stock Movement</a>
+              <a th:href="@{/stock/history}" class="btn btn-secondary">&#128203; View Transaction History</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="content-card mt-3">
+        <div class="card-header">
+          <h6>Recent Stock Transactions</h6>
+          <a th:href="@{/stock/history}" class="btn btn-outline-primary btn-sm">View All</a>
+        </div>
+        <div th:if="${stats.recentTransactions.isEmpty()}" class="empty-state" style="padding:40px">
+          <div class="empty-icon">&#128203;</div>
+          <h5>No transactions yet</h5>
+          <p>Record your first <a th:href="@{/stock}">stock movement</a>.</p>
+        </div>
+        <table th:unless="${stats.recentTransactions.isEmpty()}" class="data-table">
+          <thead>
+            <tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Remarks</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="t : ${stats.recentTransactions}">
+              <td class="text-muted fs-12" th:text="${#temporals.format(t.transactionDate, 'dd MMM yyyy HH:mm')}"></td>
+              <td th:text="${t.product.name}"></td>
+              <td>
+                <span class="stock-badge"
+                      th:classappend="${t.transactionType.name() == 'STOCK_IN'} ? 'tx-in' : 'tx-out'"
+                      th:text="${t.transactionType.displayName}"></span>
+              </td>
+              <td class="fw-600" th:text="${t.quantity}"></td>
+              <td class="text-muted fs-12" th:text="${t.remarks ?: '-'}"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

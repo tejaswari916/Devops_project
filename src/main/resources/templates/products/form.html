@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${isEdit} ? 'Edit Product' : 'New Product'">Product Form - InvenTrack</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: sidebar('products')}"></div>
+  <div class="main-content">
+    <header class="top-header">
+      <div>
+        <div class="page-title" th:text="${isEdit} ? 'Edit Product' : 'Add New Product'">Product Form</div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/products}">Products</a></li>
+            <li class="breadcrumb-item active" th:text="${isEdit} ? 'Edit' : 'New'"></li>
+          </ol>
+        </nav>
+      </div>
+    </header>
+    <main class="content-area">
+      <form th:action="${isEdit} ? @{/products/{id}/edit(id=${product.id})} : @{/products/new}"
+            th:object="${product}" method="post" novalidate>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="row">
+          <div class="col-12 col-lg-8">
+            <!-- Basic Info -->
+            <div class="form-section">
+              <div class="form-section-title">&#128230; Product Information</div>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label" for="name">Product Name <span style="color:red">*</span></label>
+                  <input type="text" id="name" th:field="*{name}" class="form-control"
+                         th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                         placeholder="e.g. Wireless Mouse" required/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="sku">SKU / Product Code <span style="color:red">*</span></label>
+                  <input type="text" id="sku" th:field="*{sku}" class="form-control"
+                         th:classappend="${#fields.hasErrors('sku')} ? 'is-invalid'"
+                         placeholder="e.g. MOUSE-001" required/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></div>
+                  <small class="text-muted fs-12">Auto-converted to uppercase. Must be unique.</small>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="category">Category</label>
+                  <input type="text" id="category" th:field="*{category}" class="form-control"
+                         list="categoryList" placeholder="e.g. Electronics"/>
+                  <datalist id="categoryList">
+                    <option th:each="cat : ${categories}" th:value="${cat}"></option>
+                  </datalist>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="description">Description</label>
+                  <textarea id="description" th:field="*{description}" class="form-control"
+                            rows="3" placeholder="Optional product description"></textarea>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pricing & Stock -->
+            <div class="form-section">
+              <div class="form-section-title">&#128200; Pricing &amp; Stock</div>
+              <div class="row g-3">
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="price">Unit Price ($) <span style="color:red">*</span></label>
+                  <input type="number" id="price" th:field="*{price}" class="form-control"
+                         th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
+                         min="0" step="0.01" placeholder="0.00" required/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="quantity">Current Stock Qty <span style="color:red">*</span></label>
+                  <input type="number" id="quantity" th:field="*{quantity}" class="form-control"
+                         th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'"
+                         min="0" placeholder="0" required/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="minStockThreshold">Min Stock Threshold</label>
+                  <input type="number" id="minStockThreshold" th:field="*{minStockThreshold}" class="form-control"
+                         min="0" placeholder="10"/>
+                  <small class="text-muted fs-12">Alert triggers below this quantity.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar Actions -->
+          <div class="col-12 col-lg-4">
+            <div class="form-section" style="position:sticky;top:80px">
+              <div class="form-section-title">&#128393; Actions</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <button type="submit" class="btn btn-primary btn-lg" style="justify-content:center">
+                  <span th:text="${isEdit} ? '&#10003; Save Changes' : '&#43; Create Product'"></span>
+                </button>
+                <a th:href="@{/products}" class="btn btn-secondary" style="justify-content:center">Cancel</a>
+              </div>
+              <div th:if="${isEdit}" style="margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0">
+                <div class="form-section-title" style="color:#e53e3e">&#128683; Danger Zone</div>
+                <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post"
+                      data-confirm="Delete this product permanently? All stock history will be removed.">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center">
+                    &#128465; Delete Product
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
